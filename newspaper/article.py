@@ -86,6 +86,12 @@ class Article(object):
 
         # `meta_keywords` are extracted via parse() from <meta> tags
         self.meta_keywords = []
+            
+        # href from <a>
+        self.links_internal = []
+
+        # href from <a>
+        self.links_external = []
 
         # `tags` are also extracted via parse() from <meta> tags
         self.tags = set()
@@ -252,10 +258,27 @@ class Article(object):
             self.set_article_html(article_html)
             self.set_text(text)
 
+        self._extract_links(self.doc)
+
         self.fetch_images()
 
         self.is_parsed = True
         self.release_resources()
+
+
+    def _extract_links(self, doc):
+        domain_len = len(self.source_url)
+        assert domain_len > 0
+        int_urls = set()
+        ext_urls = set()
+        for href in self.extractor.get_urls(doc):
+            if 'http' not in href:
+                href = self.source_url + href
+                int_urls.add(href)
+            else:
+                ext_urls.add(href)
+        self.links_internal = list(int_urls)
+        self.links_external = list(ext_urls)
 
     def fetch_images(self):
         if self.clean_doc is not None:
