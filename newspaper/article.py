@@ -88,10 +88,10 @@ class Article(object):
         self.meta_keywords = []
             
         # href from <a>
-        self.links_internal = []
+        self.urls_internal = []
 
         # href from <a>
-        self.links_external = []
+        self.urls_external = []
 
         # `tags` are also extracted via parse() from <meta> tags
         self.tags = set()
@@ -277,8 +277,8 @@ class Article(object):
                 int_urls.add(href)
             else:
                 ext_urls.add(href)
-        self.links_internal = list(int_urls)
-        self.links_external = list(ext_urls)
+        self.urls_internal = list(int_urls)
+        self.urls_external = list(ext_urls)
 
     def fetch_images(self):
         if self.clean_doc is not None:
