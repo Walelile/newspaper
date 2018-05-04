@@ -271,9 +271,19 @@ class Article(object):
         assert domain_len > 0
         int_urls = set()
         ext_urls = set()
+        scheme, home_url_path = self.source_url.split("//")
+
         for href in self.extractor.get_urls(doc):
-            if 'http' not in href:
-                href = self.source_url + href
+            if home_url_path in href:
+                if scheme not in href:
+                    if home_url_path not in href:
+                        href = self.source_url + href
+                    else:
+                        if href[:2].count("/") == 1:
+                            href = '/'+href
+                        elif href[:2].count("/") == 0:
+                            href = '//'+href
+                        href = scheme + href
                 int_urls.add(href)
             else:
                 ext_urls.add(href)
