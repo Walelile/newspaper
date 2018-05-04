@@ -272,7 +272,7 @@ class Article(object):
         int_urls = set()
         ext_urls = set()
         scheme, home_url_path = self.source_url.split("//")
-        print ("xxx source url: ", self.source_url)
+        # self.source_url: https://edition.cnn.com
         for href in self.extractor.get_urls(doc):
             if 'http' not in href:
                 # internal urls
