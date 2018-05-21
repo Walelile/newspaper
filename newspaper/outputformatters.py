@@ -55,9 +55,9 @@ class OutputFormatter(object):
         self.add_newline_to_li()
         self.replace_with_text()
         self.remove_empty_tags()
-        self.remove_trailing_media_div()
+#        self.remove_trailing_media_div()   # commented by TK
+        self.remove_trailing_media_div_2()   # commented by TK
         text = self.convert_to_text()
-        # print(self.parser.nodeToString(self.get_top_node()))
         return (text, html)
 
     def convert_to_text(self):
@@ -68,7 +68,6 @@ class OutputFormatter(object):
             except ValueError as err:  # lxml error
                 log.info('%s ignoring lxml node error: %s', __title__, err)
                 txt = None
-
             if txt:
                 txt = unescape(txt)
                 txt_lis = innerTrim(txt).split(r'\n')
@@ -143,6 +142,7 @@ class OutputFormatter(object):
         DOM depth is too deep. Many media non-content links are
         eliminated: "related", "loading gallery", etc
         """
+        print ("[WARN] newspaper.outputformatters: drop one flow: remove_trailing_media_div()")
 
         def get_depth(node, depth=1):
             """Computes depth of an lxml element via BFS, this would be
@@ -163,5 +163,21 @@ class OutputFormatter(object):
             return
 
         last_node = top_level_nodes[-1]
+        #TK: in some pages, the following steps would drop normal content nodes.
+        #    Not sure why need this.
+        #    fail url: https://edition.cnn.com/2018/05/20/us/hawaii-kilauea-volcano-lava-flow/index.html
+        #    normal url: https://edition.cnn.com/2018/05/21/politics/trump-royal-family-great-countries/index.html
         if get_depth(last_node) >= 2:
             self.parser.remove(last_node)
+
+    def remove_trailing_media_div_2(self):
+        """
+        Remove all elements that maybe a video element
+
+        Add by tkyen
+        """
+        top_node = self.get_top_node()
+        drop_nodes = top_node.xpath("//*[contains(@class, 'video')]")
+        for dn in drop_nodes:
+            self.parser.remove(dn)
+        
