@@ -271,8 +271,12 @@ class Article(object):
         assert domain_len > 0
         int_urls = set()
         ext_urls = set()
+        scheme, home_url_path = self.source_url.split("//")
+        # self.source_url: https://edition.cnn.com
         for href in self.extractor.get_urls(doc):
             if 'http' not in href:
+                # internal urls
+                # '/2018/05/02/politics/scott-pruitt-investigations/index.html',
                 href = self.source_url + href
                 int_urls.add(href)
             else:
