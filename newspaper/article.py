@@ -191,6 +191,10 @@ class Article(object):
         self.throw_if_not_downloaded_verbose()
 
         self.doc = self.config.get_parser().fromstring(self.html)
+
+        # extract links before other 'clean' operation
+        self._extract_links(self.doc)
+
         self.clean_doc = copy.deepcopy(self.doc)
 
         if self.doc is None:
@@ -257,8 +261,6 @@ class Article(object):
                 self.top_node)
             self.set_article_html(article_html)
             self.set_text(text)
-
-        self._extract_links(self.doc)
 
         self.fetch_images()
 
