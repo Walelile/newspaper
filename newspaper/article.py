@@ -274,10 +274,13 @@ class Article(object):
         scheme, home_url_path = self.source_url.split("//")
         # self.source_url: https://edition.cnn.com
         for href in self.extractor.get_urls(doc):
+            #print ("xxx href: ", href)
             if 'http' not in href:
                 # internal urls
                 # '/2018/05/02/politics/scott-pruitt-investigations/index.html',
                 href = self.source_url + href
+                int_urls.add(href)
+            elif href[:len(self.source_url)] == self.source_url:
                 int_urls.add(href)
             else:
                 ext_urls.add(href)
