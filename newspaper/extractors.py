@@ -763,6 +763,20 @@ class ContentExtractor(object):
                 tags.append(tag)
         return set(tags)
 
+
+    def extract_headings(self, doc):
+        if len(list(doc)) == 0:
+            return NO_STRINGS
+        elements = doc.xpath(".//*[self::h1 or self::h2 or self::h3 or self::h4 or self::h5]")
+        assert elements
+        headings = []
+        for el in elements:
+            head = self.parser.getText(el)
+            if head:
+                headings.append(head)
+        return set(headings)
+
+
     def calculate_best_node(self, doc):
         top_node = None
         nodes_to_check = self.nodes_to_check(doc)
