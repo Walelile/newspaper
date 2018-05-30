@@ -8,6 +8,7 @@ import logging
 import copy
 import os
 import glob
+from urllib.parse import urlparse
 
 import requests
 
@@ -187,13 +188,13 @@ class Article(object):
         self.set_html(html)
         self.set_title(title)
 
-    def parse(self):
+    def parse(self, allowed_netlocs=[]):
         self.throw_if_not_downloaded_verbose()
 
         self.doc = self.config.get_parser().fromstring(self.html)
 
         # extract links before other 'clean' operation
-        self._extract_links(self.doc)
+        self._extract_links(self.doc, allowed_netlocs)
 
         self.clean_doc = copy.deepcopy(self.doc)
 
@@ -268,12 +269,12 @@ class Article(object):
         self.release_resources()
 
 
-    def _extract_links(self, doc):
-        domain_len = len(self.source_url)
-        assert domain_len > 0
+    def _extract_links(self, doc, allowed_netlocs=[]):
         int_urls = set()
         ext_urls = set()
-        scheme, home_url_path = self.source_url.split("//")
+        allowed_netlocs = set(allowed_netlocs)
+        allowed_netlocs.add(urlparse(self.source_url).netloc)
+        #scheme, home_url_path = self.source_url.split("//")
         doc.make_links_absolute(base_url=self.source_url)
         # self.source_url: https://edition.cnn.com
         for href in self.extractor.get_urls(doc):
@@ -286,10 +287,13 @@ class Article(object):
                 else:
                     href = self.source_url + href
                     int_urls.add(href)
-            elif href[:len(self.source_url)] == self.source_url:
-                int_urls.add(href)
             else:
-                ext_urls.add(href)
+                tmp = urlparse(href)
+                netloc = tmp.netloc
+                if netloc in allowed_netlocs:
+                    int_urls.add(href)
+                else:
+                    ext_urls.add(href)
         self.urls_internal = list(int_urls)
         self.urls_external = list(ext_urls)
 
