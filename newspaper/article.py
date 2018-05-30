@@ -87,11 +87,14 @@ class Article(object):
         # `meta_keywords` are extracted via parse() from <meta> tags
         self.meta_keywords = []
             
-        # href from <a>
-        self.urls_internal = []
+        # href from <a> extracted via parse()
+        self._urls_internal = {}
 
-        # href from <a>
-        self.urls_external = []
+        # href from <a> extracted via parse()
+        self._urls_external = {}
+
+        # <h1> ~ <h5> titles extracted via parse()
+        self.headings = []
 
         # `tags` are also extracted via parse() from <meta> tags
         self.tags = set()
@@ -149,6 +152,22 @@ class Article(object):
         # A property dict for users to store custom data.
         self.additional_data = {}
 
+    @property
+    def urls_internal(self):
+        return list(self._urls_internal.keys())
+
+    @property
+    def urls_internal_with_title(self):
+        return self._urls_internal
+
+    @property
+    def urls_external(self):
+        return list(self._urls_external.keys())
+
+    @property
+    def urls_external_with_title(self):
+        return self._urls_external
+
     def build(self):
         """Build a lone article from a URL independent of the source (newspaper).
         Don't normally call this method b/c it's good to multithread articles
@@ -194,6 +213,9 @@ class Article(object):
 
         # extract links before other 'clean' operation
         self._extract_links(self.doc)
+
+        # extract headings
+        self._extract_headings(self.doc)
 
         self.clean_doc = copy.deepcopy(self.doc)
 
@@ -271,12 +293,12 @@ class Article(object):
     def _extract_links(self, doc):
         domain_len = len(self.source_url)
         assert domain_len > 0
-        int_urls = set()
-        ext_urls = set()
+        int_urls = {}
+        ext_urls = {}
         scheme, home_url_path = self.source_url.split("//")
         doc.make_links_absolute(base_url=self.source_url)
         # self.source_url: https://edition.cnn.com
-        for href in self.extractor.get_urls(doc):
+        for href, text in self.extractor.get_urls(doc, titles=True):
             #print ("xxx href: ", href)
             if 'http' not in href and 'javascript:' not in href:
                 # internal urls
@@ -285,13 +307,22 @@ class Article(object):
                     continue
                 else:
                     href = self.source_url + href
-                    int_urls.add(href)
+                    int_urls[href] = text
             elif href[:len(self.source_url)] == self.source_url:
-                int_urls.add(href)
+                int_urls[href] = text
             else:
-                ext_urls.add(href)
-        self.urls_internal = list(int_urls)
-        self.urls_external = list(ext_urls)
+                ext_urls[href] = text
+        self._urls_internal = int_urls
+        self._urls_external = ext_urls
+
+    def _extract_headings(self, doc):
+        """
+        Extract <h1> ~ <h5>
+        :param doc: lxml HtmlElement
+        :return:
+        """
+        self.headings = self.extractor.extract_headings(doc)
+
 
     def fetch_images(self):
         if self.clean_doc is not None:
