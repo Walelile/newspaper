@@ -277,7 +277,7 @@ class Article(object):
         # self.source_url: https://edition.cnn.com
         for href in self.extractor.get_urls(doc):
             #print ("xxx href: ", href)
-            if 'http' not in href:
+            if 'http' not in href and 'javascript:' not in href:
                 # internal urls
                 # '/2018/05/02/politics/scott-pruitt-investigations/index.html',
                 href = self.source_url + href
