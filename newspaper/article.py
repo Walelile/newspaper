@@ -169,6 +169,17 @@ class Article(object):
     def urls_external_with_title(self):
         return self._urls_external
 
+    def get_article_type(self):
+        """
+        Return the value of 'og:type'
+
+        :return: None|str   > 'website' or 'article' or None
+        """
+        if 'og' in self.meta_data and 'type' in self.meta_data['og']:
+            return self.meta_data['og']['type']
+        else:
+            return None
+
     def build(self):
         """Build a lone article from a URL independent of the source (newspaper).
         Don't normally call this method b/c it's good to multithread articles
