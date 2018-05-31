@@ -768,7 +768,7 @@ class ContentExtractor(object):
         if len(list(doc)) == 0:
             return NO_STRINGS
         elements = doc.xpath(".//*[self::h1 or self::h2 or self::h3 or self::h4 or self::h5]")
-        assert elements
+        #assert elements
         headings = []
         for el in elements:
             head = self.parser.getText(el)
