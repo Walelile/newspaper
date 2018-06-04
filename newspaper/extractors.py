@@ -482,6 +482,7 @@ class ContentExtractor(object):
         """
         return self.get_meta_content(doc, "meta[name=keywords]")
 
+
     def get_meta_data(self, doc):
         data = defaultdict(dict)
         properties = self.parser.css_select(doc, 'meta')
