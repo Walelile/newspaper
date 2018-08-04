@@ -3,8 +3,8 @@
 # Usage:
 # $ sh install.sh
 
-VENV="venv"
-PY_BIN="python3.4"
+PY_BIN="python3.7"
+PIP="pip3.7"
 
 echo "> use venv dir name: $VENV"
 echo "> use python3 bin: $PY_BIN"
@@ -19,21 +19,33 @@ PYTHON_MAJOR=`expr "$PYTHON_VERSION_INFO" : 'Python \([0-9]\)'`
 PYTHON_MINOR=`expr "$PYTHON_VERSION_INFO" : 'Python ..\([0-9]\)'` 
 PYTHON_VERSION="$PYTHON_MAJOR.$PYTHON_MINOR"
 
+echo "major: $PYTHON_MAJOR"
+echo "minor: $PYTHON_MINOR"
 echo "python version: $PYTHON_VERSION"
+
+VENV="venv$PYTHON_MAJOR$PYTHON_MINOR"
+
 
 if [ ! -d $VENV ]; then
 	case "$PYTHON_VERSION" in 
+		"3.7")
+			echo "$PY_BIN -m venv $VENV --system-site-packages"
+			$PY_BIN -m venv $VENV --system-site-packages
+			source $VENV/bin/activate
+			$PIP install -e .
+			;;
+
 		"3.5")
 			echo "$PY_BIN -m venv $VENV --system-site-packages"
 			$PY_BIN -m venv $VENV --system-site-packages
 			source $VENV/bin/activate
-			pip3 install -e .
+			$PIP install -e .
 			;;
 		"3.4")
 			echo "$PY_BIN -m virtualenv -p $PY_BIN --system-site-packages $VENV"
 			$PY_BIN -m virtualenv -p $PY_BIN  $VENV --system-site-packages
 			source $VENV/bin/activate
-			pip3 install -e .
+			$PIP install -e .
 			;;
 		*)
 			echo "not supported python: $PYTHON_VERSION, or fix this script"
@@ -42,6 +54,9 @@ if [ ! -d $VENV ]; then
 	esac
 else
 	case "$PYTHON_VERSION" in 
+		"3.7")
+			source $VENV/bin/activate
+			;;
 		"3.5")
 			source $VENV/bin/activate
 			;;
@@ -57,7 +72,8 @@ else
 
 fi
 
-
+# update pip
+pip3 install --upgrade pip
 
 #if [ "$PYTHON_MAJOR" = "3" ]; then
 #	if [ "$PYTHON_MINOR" = "5" ]; then
