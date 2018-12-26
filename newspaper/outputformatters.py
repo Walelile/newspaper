@@ -140,9 +140,12 @@ class OutputFormatter(object):
     def remove_trailing_media_div(self):
         """Punish the *last top level* node in the top_node if it's
         DOM depth is too deep. Many media non-content links are
-        eliminated: "related", "loading gallery", etc
+        eliminated: "related", "loading gallery", etc. It skips removal if
+        last top level node's class is one of NON_MEDIA_CLASSES.
         """
         print ("[WARN] newspaper.outputformatters: drop one flow: remove_trailing_media_div()")
+
+        NON_MEDIA_CLASSES = ('zn-body__read-all', )
 
         def get_depth(node, depth=1):
             """Computes depth of an lxml element via BFS, this would be
@@ -163,10 +166,18 @@ class OutputFormatter(object):
             return
 
         last_node = top_level_nodes[-1]
+<<<<<<< HEAD
         #TK: in some pages, the following steps would drop normal content nodes.
         #    Not sure why need this.
         #    fail url: https://edition.cnn.com/2018/05/20/us/hawaii-kilauea-volcano-lava-flow/index.html
         #    normal url: https://edition.cnn.com/2018/05/21/politics/trump-royal-family-great-countries/index.html
+=======
+
+        last_node_class = self.parser.getAttribute(last_node, 'class')
+        if last_node_class in NON_MEDIA_CLASSES:
+            return
+
+>>>>>>> 162c168e8d20086fd2723a15f763388909b7e642
         if get_depth(last_node) >= 2:
             self.parser.remove(last_node)
 
